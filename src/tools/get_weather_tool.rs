@@ -1,31 +1,58 @@
 use std::sync::Arc;
 
+use async_trait::async_trait;
 use serde_json::{Value, json};
 
-use crate::{config::Config, types::ToolError};
+use crate::{config::Config, tools::Tool, types::ToolError};
 
-pub fn get_weather_description() -> Value {
-    json!({
-        "name": "get_weather",
-        "description": "Get current weather conditions for a city. 
-                    Use when the research question involves weather, 
-                    climate, or current conditions in a location. 
-                    Returns temperature, conditions, humidity, and wind speed.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "city": {
-                    "type": "string",
-                    "description": "City name, optionally with country code: 'London' or 'London,UK'"
-                }
-            },
-            "required": ["city"]
-        }
-    })
+pub struct WeatherTool {
+    config: Arc<Config>,
 }
 
+impl WeatherTool {
+    pub fn new(config: Arc<Config>) -> Self {
+        Self { config }
+    }
+}
+
+#[async_trait]
+impl Tool for WeatherTool {
+    fn name(&self) -> &str {
+        "get_weather"
+    }
+
+    fn description(&self) -> Value {
+        json!({
+            "name": self.name(),
+            "description": "Get current weather conditions for a city. 
+                        Use when the research question involves weather, 
+                        climate, or current conditions in a location. 
+                        Returns temperature, conditions, humidity, and wind speed.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {
+                        "type": "string",
+                        "description": "City name, optionally with country code: 'London' or 'London,UK'"
+                    }
+                },
+                "required": ["city"]
+            }
+        })
+    }
+
+    async fn execute(&self, args: &Value) -> Result<Value, ToolError> {
+        let city = args["city"].as_str().ok_or_else(|| {
+            ToolError::NonRetryable("missing required parameter: city".to_string())
+        })?;
+
+        get_weather(&self.config, city).await
+    }
+}
+
+
 pub async fn get_weather(
-    config: Arc<Config>,
+    config: &Arc<Config>,
     city: &str,
 ) -> Result<Value, ToolError> {
 

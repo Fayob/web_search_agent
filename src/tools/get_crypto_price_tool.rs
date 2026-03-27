@@ -1,32 +1,59 @@
 use std::sync::Arc;
 
+use async_trait::async_trait;
 use serde_json::{Value, json};
 
-use crate::{config::Config, types::ToolError};
+use crate::{config::Config, tools::Tool, types::ToolError};
 
-pub fn get_crypto_price_description() -> Value {
-    json!({
-        "name": "get_crypto_price",
-        "description": "Get the current price and 24h stats for a cryptocurrency. 
-                    Use for research questions about crypto markets, prices, or 
-                    market cap. Pass the CoinGecko coin ID: 'bitcoin', 'ethereum', 
-                    'solana' etc.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "coin_id": {
-                    "type": "string",
-                    "description": "CoinGecko coin ID in lowercase: 'bitcoin', 
-                                'ethereum', 'solana', 'cardano'"
-                }
-            },
-            "required": ["coin_id"]
-        }
-    })
+pub struct CryptoPriceTool {
+    config: Arc<Config>,
 }
 
+impl CryptoPriceTool {
+    pub fn new(config: Arc<Config>) -> Self {
+        Self { config }
+    }
+}
+
+#[async_trait]
+impl Tool for CryptoPriceTool {
+    fn name(&self) -> &str {
+        "get_crypto_price"
+    }
+
+    fn description(&self) -> Value {
+        json!({
+            "name": self.name(),
+            "description": "Get the current price and 24h stats for a cryptocurrency. 
+                        Use for research questions about crypto markets, prices, or 
+                        market cap. Pass the CoinGecko coin ID: 'bitcoin', 'ethereum', 
+                        'solana' etc.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "coin_id": {
+                        "type": "string",
+                        "description": "CoinGecko coin ID in lowercase: 'bitcoin', 
+                                    'ethereum', 'solana', 'cardano'"
+                    }
+                },
+                "required": ["coin_id"]
+            }
+        })
+    }
+
+    async fn execute(&self, args: &Value) -> Result<Value, ToolError> {
+        let coin_id = args["coin_id"].as_str().ok_or_else(|| {
+            ToolError::NonRetryable("missing required parameter: coin_id".to_string())
+        })?;
+
+        get_crypto_price(&self.config, coin_id).await
+    }
+}
+
+
 pub async fn get_crypto_price(
-    config: Arc<Config>,
+    config: &Arc<Config>,
     coin_id: &str,
 ) -> Result<Value, ToolError> {
 
