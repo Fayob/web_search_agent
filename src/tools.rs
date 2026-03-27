@@ -2,6 +2,7 @@ pub mod fetch_url_tool;
 pub mod get_crypto_price_tool;
 pub mod get_weather_tool;
 pub mod search_web_tool;
+pub mod  tool_registry;
 
 use async_trait::async_trait;
 use serde_json::Value;

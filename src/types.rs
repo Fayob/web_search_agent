@@ -61,7 +61,7 @@ pub struct AgentRunResult {
     pub iterations: u32,
     pub tool_calls: Vec<ToolCall>,
     pub report: Option<ResearchReport>,
-    pub terminated_reason: TerminationReason,
+    pub termination_reason: TerminationReason,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
