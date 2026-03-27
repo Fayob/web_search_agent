@@ -21,7 +21,7 @@ impl Config {
             gemini_api_key: std::env::var("GEMINI_API_KEY")
                 .context("GEMINI_API_KEY not set")?,
             http_client: reqwest::Client::builder()
-                .timeout(std::time::Duration::from_secs(20))
+                .timeout(std::time::Duration::from_secs(15))
                 .user_agent("WebSearchAgent/1.0")
                 .build()
                 .context("failed to build HTTP clients")?,
