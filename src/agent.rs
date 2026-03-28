@@ -6,14 +6,10 @@ use tokio::time::Instant;
 use tracing::{debug, info, warn};
 
 use crate::{
-    config::Config,
-    metrics::RunMetrics,
-    parser::parse_search_report,
-    tools::{
+    config::Config, metrics::RunMetrics, structured::build_search_report, tools::{
         fetch_url_tool::FetchURLTool, get_crypto_price_tool::CryptoPriceTool,
         get_weather_tool::WeatherTool, search_web_tool::SearchWebTool, tool_registry::ToolRegistry,
-    },
-    types::{AgentRunResult, SearchReport, TerminationReason, ToolCall, ToolResult},
+    }, types::{AgentRunResult, SearchReport, TerminationReason, ToolCall, ToolResult}
 };
 
 pub struct RetryConfig {
@@ -190,15 +186,11 @@ impl SearchAgent {
                     .unwrap_or("")
                     .to_string();
 
-                let report = Some(SearchReport {
-                    answer: final_content,
-                    confidence: "".to_string(),
-                    key_findings: vec![],
-                    limitations: "".to_string(),
-                    question: question.to_string(),
-                    search_queries: vec![],
-                    sources: vec![]
-                });
+                let report = build_search_report(
+                    question, 
+                    &final_content, 
+                    &tool_calls_log
+                );
 
                 info!(
                     iterations = iterations,
@@ -206,7 +198,8 @@ impl SearchAgent {
                     success_rate = metrics.tool_success_rate(),
                     avg_gemini_ms = metrics.avg_model_latency_ms(),
                     estimated_tokens = metrics.estimated_tokens_used,
-                    report_parsed = report.is_some(),
+                    sources_count    = report.sources.len(),
+                    confidence       = %report.confidence,
                     "agent run completed"
                 );
 
@@ -215,7 +208,7 @@ impl SearchAgent {
                 return Ok(self.build_result(
                     iterations,
                     tool_calls_log,
-                    report,
+                    Some(report),
                     TerminationReason::Completed,
                     &metrics,
                     run_start,

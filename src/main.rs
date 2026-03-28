@@ -5,7 +5,7 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::from_default_env()
-                .add_directive("research_agent=info".parse()?)
+                .add_directive("search_agent=info".parse()?)
         )
         .with_target(true)
         .with_thread_ids(false)
@@ -21,8 +21,8 @@ async fn main() -> anyhow::Result<()> {
     //          in Ethereum scaling solutions?".to_string()
     //     });
 
-    let question = "Compare London and Ontario's weather, 
-            and also give me the current btc price in yen";
+    let question = "What is the price of bitcoin in canadian currency, with their 
+                        current temperature";
 
     tracing::info!(question = %question, "starting search agent");
 
@@ -31,7 +31,7 @@ async fn main() -> anyhow::Result<()> {
     match result.report {
         Some(report) => {
             println!("\n{}", "=".repeat(60));
-            println!("RESEARCH REPORT");
+            println!("WEB SEARCH REPORT");
             println!("{}", "=".repeat(60));
             println!("Question:   {}", report.question);
             println!("Confidence: {}", report.confidence);

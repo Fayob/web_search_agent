@@ -4,3 +4,4 @@ pub mod tools;
 pub mod agent;
 pub mod metrics;
 pub mod parser;
+pub mod structured;
