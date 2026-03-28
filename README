@@ -294,7 +294,7 @@ CoinGecko requires no key on the free tier.
 
 ```bash
 # Clone and build
-git clone https://github.com/fayob/web_search_agent
+git clone https://github.com/Fayob/web_search_agent.git
 cd web_search_agent
 cargo build
 
