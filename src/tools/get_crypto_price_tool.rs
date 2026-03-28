@@ -5,18 +5,18 @@ use serde_json::{Value, json};
 
 use crate::{config::Config, tools::Tool, types::ToolError};
 
-pub struct CryptoPriceTool {
+pub struct GetCryptoPriceTool {
     config: Arc<Config>,
 }
 
-impl CryptoPriceTool {
+impl GetCryptoPriceTool {
     pub fn new(config: Arc<Config>) -> Self {
         Self { config }
     }
 }
 
 #[async_trait]
-impl Tool for CryptoPriceTool {
+impl Tool for GetCryptoPriceTool {
     fn name(&self) -> &str {
         "get_crypto_price"
     }

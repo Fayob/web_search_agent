@@ -5,18 +5,18 @@ use serde_json::{Value, json};
 
 use crate::{config::Config, tools::Tool, types::ToolError};
 
-pub struct WeatherTool {
+pub struct GetWeatherTool {
     config: Arc<Config>,
 }
 
-impl WeatherTool {
+impl GetWeatherTool {
     pub fn new(config: Arc<Config>) -> Self {
         Self { config }
     }
 }
 
 #[async_trait]
-impl Tool for WeatherTool {
+impl Tool for GetWeatherTool {
     fn name(&self) -> &str {
         "get_weather"
     }

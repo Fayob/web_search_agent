@@ -15,14 +15,14 @@ async fn main() -> anyhow::Result<()> {
     let config = Config::from_env()?.into_arc();
     let agent = SearchAgent::new(config);
 
-    // let question = std::env::args().nth(1)
-    //     .unwrap_or_else(|| {
-    //         "What are the latest zero-knowledge proof implementations \
-    //          in Ethereum scaling solutions?".to_string()
-    //     });
+    let question = std::env::args().nth(1)
+        .unwrap_or_else(|| {
+            "What are the latest zero-knowledge proof implementations \
+             in Ethereum scaling solutions?".to_string()
+        });
 
-    let question = "What is the price of bitcoin in canadian currency, with their 
-                        current temperature";
+    // let question = "What is the price of bitcoin in canadian currency, with their 
+    //                     current temperature";
 
     tracing::info!(question = %question, "starting search agent");
 

@@ -7,8 +7,8 @@ use tracing::{debug, info, warn};
 
 use crate::{
     config::Config, metrics::RunMetrics, structured::build_search_report, tools::{
-        fetch_url_tool::FetchURLTool, get_crypto_price_tool::CryptoPriceTool,
-        get_weather_tool::WeatherTool, search_web_tool::SearchWebTool, tool_registry::ToolRegistry,
+        fetch_url_tool::FetchURLTool, get_crypto_price_tool::GetCryptoPriceTool,
+        get_weather_tool::GetWeatherTool, search_web_tool::SearchWebTool, tool_registry::ToolRegistry,
     }, types::{AgentRunResult, SearchReport, TerminationReason, ToolCall, ToolResult}
 };
 
@@ -63,8 +63,8 @@ impl SearchAgent {
         let mut registry = ToolRegistry::new();
         registry.register(Box::new(SearchWebTool::new(config.clone())));
         registry.register(Box::new(FetchURLTool::new(config.clone())));
-        registry.register(Box::new(WeatherTool::new(config.clone())));
-        registry.register(Box::new(CryptoPriceTool::new(config.clone())));
+        registry.register(Box::new(GetWeatherTool::new(config.clone())));
+        registry.register(Box::new(GetCryptoPriceTool::new(config.clone())));
 
         Self {
             config,
