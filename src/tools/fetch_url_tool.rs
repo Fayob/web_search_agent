@@ -24,21 +24,24 @@ impl Tool for FetchURLTool {
 
     fn description(&self) -> Value {
         json!({
-            "name": self.name(),
-            "description": "Fetch and read the full text content of a web page.
-                        Use this after search_web to read the actual content of 
-                        promising URLs. Strips HTML tags and returns clean text. 
-                        Content is truncated to ~3000 characters. Do not use this 
-                        for search — use search_web first to find relevant URLs.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "The full URL to fetch including https://"
-                    }
-                },
-                "required": ["url"]
+            "type": "function",
+            "function": {
+                "name": self.name(),
+                "description": "Fetch and read the full text content of a web page.
+                            Use this after search_web to read the actual content of 
+                            promising URLs. Strips HTML tags and returns clean text. 
+                            Content is truncated to ~3000 characters. Do not use this 
+                            for search — use search_web first to find relevant URLs.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "The full URL to fetch including https://"
+                        }
+                    },
+                    "required": ["url"]
+                }
             }
         })
     }

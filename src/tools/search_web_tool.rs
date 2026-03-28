@@ -23,26 +23,29 @@ impl Tool for SearchWebTool {
 
     fn description(&self) -> Value {
         json!({
-            "name": self.name(),
-            "description": "Search the web using Brave Search API.
-                        Use this to find relevant URLs and snippets for a research question. 
-                        Pass a concise search query of 3-7 words. Returns titles, URLs, and 
-                        snippets but NOT full page content. Use fetch_url separately to read 
-                        full content from promising URLs.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "The search query. Keep it concise, 3-7 words.
-                                    Do not pass full sentences or URLs."
+            "type": "function",
+            "function": {
+                "name": self.name(),
+                "description": "Search the web using Brave Search API.
+                            Use this to find relevant URLs and snippets for a research question. 
+                            Pass a concise search query of 3-7 words. Returns titles, URLs, and 
+                            snippets but NOT full page content. Use fetch_url separately to read 
+                            full content from promising URLs.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "The search query. Keep it concise, 3-7 words.
+                                        Do not pass full sentences or URLs."
+                        },
+                        "count": {
+                            "type": "integer",
+                            "description": "Number of results to return. Default 5, maximum 10."
+                        }
                     },
-                    "count": {
-                        "type": "integer",
-                        "description": "Number of results to return. Default 5, maximum 10."
-                    }
-                },
-                "required": ["query"]
+                    "required": ["query"]
+                }
             }
         })
     }

@@ -23,20 +23,23 @@ impl Tool for WeatherTool {
 
     fn description(&self) -> Value {
         json!({
-            "name": self.name(),
-            "description": "Get current weather conditions for a city. 
-                        Use when the research question involves weather, 
-                        climate, or current conditions in a location. 
-                        Returns temperature, conditions, humidity, and wind speed.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "city": {
-                        "type": "string",
-                        "description": "City name, optionally with country code: 'London' or 'London,UK'"
-                    }
-                },
-                "required": ["city"]
+            "type": "function",
+            "function": {
+                "name": self.name(),
+                "description": "Get current weather conditions for a city. 
+                            Use when the research question involves weather, 
+                            climate, or current conditions in a location. 
+                            Returns temperature, conditions, humidity, and wind speed.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "city": {
+                            "type": "string",
+                            "description": "City name, optionally with country code: 'London' or 'London,UK'"
+                        }
+                    },
+                    "required": ["city"]
+                }
             }
         })
     }
@@ -97,6 +100,14 @@ pub async fn get_weather(
             format!("failed to parse weather response: {}", e)
         ))?;
 
+    // println!("{:?}: ", json!({
+    //     "city": city,
+    //     "temperature_celsius": body["main"]["temp"],
+    //     "feels_like_celsius":  body["main"]["feels_like"],
+    //     "conditions":          body["weather"][0]["description"],
+    //     "humidity_percent":    body["main"]["humidity"],
+    //     "wind_speed_ms":       body["wind"]["speed"]
+    // }));
     // Extract and reshape — only what's useful for research
     Ok(json!({
         "city": city,

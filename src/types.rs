@@ -22,7 +22,7 @@ impl Display for ToolError {
 
 impl std::error::Error for ToolError {}
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "status", rename_all = "snake_case")]
 pub enum ToolResult {
     Success { data: serde_json::Value },
@@ -60,7 +60,7 @@ pub struct ToolCall {
 pub struct AgentRunResult {
     pub iterations: u32,
     pub tool_calls: Vec<ToolCall>,
-    pub report: Option<ResearchReport>,
+    pub report: Option<SearchReport>,
     pub termination_reason: TerminationReason,
 }
 
@@ -74,7 +74,7 @@ pub enum TerminationReason {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-pub struct ResearchReport {
+pub struct SearchReport {
     pub question: String,
     pub answer: String,
     pub sources: Vec<Source>,
