@@ -277,7 +277,7 @@ Create a `.env` file in the project root. This file is in `.gitignore` and must 
 # .env
 BRAVE_API_KEY=your_brave_search_api_key
 OPENWEATHER_API_KEY=your_openweathermap_api_key
-Gemini_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 **Getting each key:**
@@ -286,7 +286,7 @@ Gemini_API_KEY=your_gemini_api_key
 |-----|----------------|-----------|
 | `BRAVE_API_KEY` | [brave.com/search/api](https://brave.com/search/api/) | 2,000 queries/month |
 | `OPENWEATHER_API_KEY` | [openweathermap.org/api](https://openweathermap.org/api) | 1,000 calls/day |
-| `Gemini_API_KEY` | [aistudio.google.com](https://aistudio.google.com/api-keys) | Free, Pay per use |
+| `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com/api-keys) | Free, Pay per use |
 
 CoinGecko requires no key on the free tier.
 
