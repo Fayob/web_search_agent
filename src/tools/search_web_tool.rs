@@ -3,15 +3,24 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde_json::{Value, json};
 
-use crate::{config::Config, tools::Tool, types::ToolError};
+use crate::{
+    config::{Config, SearchProvider},
+    tools::Tool,
+    types::ToolError,
+};
 
 pub struct SearchWebTool {
     config: Arc<Config>,
+    // Immutable for this tool registry, which SearchAgent creates per run.
+    conversation_id: String,
 }
 
 impl SearchWebTool {
     pub fn new(config: Arc<Config>) -> Self {
-        Self { config }
+        Self {
+            config,
+            conversation_id: uuid::Uuid::new_v4().to_string(),
+        }
     }
 }
 
@@ -26,7 +35,7 @@ impl Tool for SearchWebTool {
             "type": "function",
             "function": {
                 "name": self.name(),
-                "description": "Search the web using Brave Search API.
+                "description": "Search the web using the configured search provider.
                             Use this to find relevant URLs and snippets for a research question. 
                             Pass a concise search query of 3-7 words. Returns titles, URLs, and 
                             snippets but NOT full page content. Use fetch_url separately to read 
@@ -56,7 +65,7 @@ impl Tool for SearchWebTool {
         })?;
         let count = args["count"].as_u64().unwrap_or(5) as usize;
 
-        search_web(&self.config, query, count).await
+        search_web_for_run(&self.config, query, count, &self.conversation_id).await
     }
 }
 
@@ -65,6 +74,37 @@ pub async fn search_web(
     query: &str,
     count: usize,
 ) -> Result<Value, ToolError> {
+    // A standalone helper call is an independent task. Registry calls use the
+    // identity owned by their SearchWebTool instead.
+    search_web_for_run(config, query, count, &uuid::Uuid::new_v4().to_string()).await
+}
+
+async fn search_web_for_run(
+    config: &Arc<Config>,
+    query: &str,
+    count: usize,
+    conversation_id: &str,
+) -> Result<Value, ToolError> {
+    if query.trim().is_empty() {
+        return Err(ToolError::NonRetryable(
+            "query must not be empty".to_string(),
+        ));
+    }
+    let count = count.clamp(1, 10);
+    match config.search_provider {
+        SearchProvider::Parallel => {
+            return config
+                .parallel_search
+                .search(query, count, conversation_id)
+                .await;
+        }
+        SearchProvider::None => {
+            return Err(ToolError::NonRetryable(
+                "web search is disabled".to_string(),
+            ));
+        }
+        SearchProvider::Brave => {}
+    }
     let url = format!(
         "https://api.search.brave.com/res/v1/web/search?q={}&count={}",
         urlencoding::encode(query),

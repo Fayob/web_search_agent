@@ -20,6 +20,7 @@
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [API Keys](#api-keys)
+  - [Search provider](#search-provider)
   - [Running the Agent](#running-the-agent)
   - [Log Levels](#log-levels)
 - [Production Guarantees](#production-guarantees)
@@ -265,7 +266,7 @@ already have.
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # Verify
-rustc --version   # rustc 1.75.0 or later
+rustc --version   # rustc 1.85.0 or later (Rust 2024 edition)
 cargo --version
 ```
 
@@ -275,7 +276,8 @@ Create a `.env` file in the project root. This file is in `.gitignore` and must 
 
 ```bash
 # .env
-BRAVE_API_KEY=your_brave_search_api_key
+# Optional: keep Brave by configuring its key. Otherwise search uses Parallel.
+# BRAVE_API_KEY=your_brave_search_api_key
 OPENWEATHER_API_KEY=your_openweathermap_api_key
 GEMINI_API_KEY=your_gemini_api_key
 ```
@@ -284,11 +286,42 @@ GEMINI_API_KEY=your_gemini_api_key
 
 | Key | Where to get it | Free tier |
 |-----|----------------|-----------|
-| `BRAVE_API_KEY` | [brave.com/search/api](https://brave.com/search/api/) | 2,000 queries/month |
+| `BRAVE_API_KEY` (optional) | [brave.com/search/api](https://brave.com/search/api/) | 2,000 queries/month |
 | `OPENWEATHER_API_KEY` | [openweathermap.org/api](https://openweathermap.org/api) | 1,000 calls/day |
 | `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com/api-keys) | Free, Pay per use |
 
 CoinGecko requires no key on the free tier.
+
+### Search provider
+
+With no `BRAVE_API_KEY` or `SEARCH_PROVIDER` configured, `search_web` uses
+[Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp) at
+`https://search.parallel.ai/mcp`. Anonymous searches use Fast mode and need no
+search-service account or API key. The free endpoint has usage limits; quota and
+service failures are returned as tool errors for the agent to handle.
+`GEMINI_API_KEY` and `OPENWEATHER_API_KEY` are still required by the application.
+
+A configured, nonempty `BRAVE_API_KEY` keeps Brave as the default. To choose
+explicitly, set `SEARCH_PROVIDER` in your environment or `.env`:
+
+| Value | Behavior |
+|-------|----------|
+| `parallel` | Use keyless Parallel search, even when a Brave key is configured. |
+| `brave` | Use Brave; fail configuration if `BRAVE_API_KEY` is missing. |
+| `none` | Remove `search_web` from the available tools and reject search calls. |
+
+An invalid provider is a configuration error. Provider failures never silently
+switch services. Environment variables take precedence over `.env` values.
+Search results keep the existing titles, URLs and snippets contract; `count`
+limits the returned results locally to 1–10. `fetch_url` continues to fetch pages
+directly, including when search is disabled.
+
+The MCP client uses the existing 15-second HTTP request timeout, supports JSON
+and SSE responses, and stops in-flight requests when the caller cancels them.
+It reuses its MCP transport session across searches. Each `SearchAgent::run`
+gets a fresh conversation identifier, shared by searches within that run, even
+when runs overlap or agents share the same configuration. Page fetching stays
+on the existing direct HTTP path.
 
 ### Running the Agent
 
